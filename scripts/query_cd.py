@@ -96,63 +96,36 @@ BANK_MAPPING = {
 }
 
 def get_bank_full_name(bank_input):
-    """
-    根据用户输入获取银行完整名称
-    
-    Args:
-        bank_input: 用户输入的银行简称
-    
-    Returns:
-        银行完整名称
-    """
-    # 直接匹配
+    """根据用户输入获取银行完整名称"""
     if bank_input in BANK_MAPPING:
         return BANK_MAPPING[bank_input]
     
-    # 尝试模糊匹配（输入包含在映射键中）
     for key, value in BANK_MAPPING.items():
         if key in bank_input or bank_input in key:
             return value
     
-    # 如果都没有匹配，返回原输入
     return bank_input
 
 def query_cd(bank_input="民生"):
-    """
-    查询指定银行的同业存单发行信息
-    
-    Args:
-        bank_input: 银行名称关键词（如：民生、工商、建设、招商等）
-    
-    Returns:
-        screenshot_path: 截图保存路径
-        records: 查询结果列表
-        bank_full_name: 银行完整名称
-    """
-    # 获取银行完整名称
+    """查询指定银行的同业存单发行信息"""
     bank_full_name = get_bank_full_name(bank_input)
     
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        page = browser.new_page(viewport={"width": 1920, "height": 1080})
+        # 使用更宽的视口以显示更多列
+        page = browser.new_page(viewport={"width": 2560, "height": 1080})
         
-        # 打开页面
         page.goto("https://www.chinamoney.com.cn/chinese/tycdfxxx/?issueStType=1")
         time.sleep(5)
         
-        # 在发行人输入框输入银行完整名称
         page.fill("#ENTY", bank_full_name)
         time.sleep(1)
-        
-        # 点击查询按钮
         page.click("#queryInterbankInfo")
         time.sleep(5)
         
-        # 截图
         screenshot_path = f"/tmp/cd_result_{bank_input}.png"
         page.screenshot(path=screenshot_path, full_page=True)
         
-        # 获取结果数量
         result_text = page.inner_text("body")
         match = re.search(r'共\s*(\d+)\s*条', result_text)
         
@@ -162,7 +135,6 @@ def query_cd(bank_input="民生"):
             print(f"查询结果: 共 {count} 条记录")
             
             if count > 0:
-                # 获取表格数据
                 tables = page.query_selector_all("table")
                 for table in tables:
                     rows = table.query_selector_all("tbody tr")
@@ -170,17 +142,23 @@ def query_cd(bank_input="民生"):
                         for row in rows:
                             cells = row.query_selector_all("td")
                             if len(cells) >= 5:
-                                data = [cell.inner_text().strip() for cell in cells[:5]]
-                                if data[0]:  # 只保存有数据的行
-                                    # 只保留匹配该银行的记录
+                                data = [cell.inner_text().strip() for cell in cells]
+                                if data[0]:
                                     if bank_full_name in data[1] or bank_input in data[1]:
-                                        records.append({
-                                            "code": data[0],
-                                            "name": data[1],
-                                            "date": data[2],
-                                            "method": data[3],
-                                            "term": data[4]
-                                        })
+                                        record = {}
+                                        # 根据表格实际列数映射
+                                        record["code"] = data[0] if len(data) > 0 else ""      # 存单代码
+                                        record["name"] = data[1] if len(data) > 1 else ""      # 存单简称
+                                        record["date"] = data[2] if len(data) > 2 else ""      # 发行日期
+                                        record["method"] = data[3] if len(data) > 3 else ""    # 发行方式
+                                        record["term"] = data[4] if len(data) > 4 else ""      # 期限
+                                        record["coupon"] = data[5] if len(data) > 5 else ""    # 息票类型
+                                        record["face_rate"] = data[6] if len(data) > 6 else "" # 票面利率
+                                        record["ref_rate"] = data[7] if len(data) > 7 else ""  # 参考收益率
+                                        record["amount"] = data[8] if len(data) > 8 else ""    # 计划发行量
+                                        record["rating"] = data[9] if len(data) > 9 else ""    # 主体评级
+                                        
+                                        records.append(record)
                         break
         else:
             print("未能获取结果数量")
@@ -189,7 +167,6 @@ def query_cd(bank_input="民生"):
         return screenshot_path, records, bank_full_name
 
 if __name__ == "__main__":
-    # 获取命令行参数
     bank_input = sys.argv[1] if len(sys.argv) > 1 else "民生"
     
     print(f"正在查询 [{bank_input}] 的同业存单信息...")
@@ -206,5 +183,15 @@ if __name__ == "__main__":
             print(f"    发行日期: {record['date']}")
             print(f"    发行方式: {record['method']}")
             print(f"    期限: {record['term']}")
+            if record['amount'] and record['amount'] not in ['', '--']:
+                print(f"    计划发行量: {record['amount']}")
+            if record['ref_rate'] and record['ref_rate'] not in ['', '--']:
+                print(f"    参考收益率: {record['ref_rate']}")
+            if record['face_rate'] and record['face_rate'] not in ['', '--']:
+                print(f"    票面利率: {record['face_rate']}")
+            if record['rating'] and record['rating'] not in ['', '--']:
+                print(f"    主体评级: {record['rating']}")
+            if record['coupon'] and record['coupon'] not in ['', '--']:
+                print(f"    息票类型: {record['coupon']}")
     else:
         print(f"\n今日{bank_full_name}无存单发行计划")
