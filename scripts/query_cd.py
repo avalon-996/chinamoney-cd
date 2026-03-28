@@ -184,9 +184,9 @@ if __name__ == "__main__":
             print(f"    发行方式: {record['method']}")
             print(f"    期限: {record['term']}")
             if record['amount'] and record['amount'] not in ['', '--']:
-                print(f"    计划发行量: {record['amount']}")
+                print(f"    计划发行量(亿元): {record['amount']}")
             if record['ref_rate'] and record['ref_rate'] not in ['', '--']:
-                print(f"    参考收益率: {record['ref_rate']}")
+                print(f"    参考收益率(%): {record['ref_rate']}")
             if record['face_rate'] and record['face_rate'] not in ['', '--']:
                 print(f"    票面利率: {record['face_rate']}")
             if record['rating'] and record['rating'] not in ['', '--']:
