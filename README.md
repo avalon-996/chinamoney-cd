@@ -1,9 +1,9 @@
 ---
 name: chinamoney-cd
-version: 1.0.0
+version: 1.0.1
 description: 查询中国货币网同业存单发行信息，支持全市场所有银行机构，精准匹配，一键获取待发行存单列表
 author: Avalon
-homepage: https://github.com/avalon/chinamoney-cd
+homepage: https://github.com/avalon-996/chinamoney-cd
 keywords:
   - 同业存单
   - 存单查询
@@ -27,7 +27,7 @@ env: []
 
 # Chinamoney CD Query
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/avalon/chinamoney-cd)
+[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](https://github.com/avalon-996/chinamoney-cd)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
@@ -73,7 +73,7 @@ openclaw skill install chinamoney-cd
 ### 手动安装
 
 ```bash
-git clone https://github.com/avalon/chinamoney-cd.git ~/.openclaw/skills/chinamoney-cd
+git clone https://github.com/avalon-996/chinamoney-cd.git ~/.openclaw/skills/chinamoney-cd
 cd ~/.openclaw/skills/chinamoney-cd
 pip install -r requirements.txt
 ```
@@ -191,11 +191,19 @@ chinamoney-cd/
 
 欢迎提交 Issue 和 PR！
 
+## 📧 联系方式
+
+如有问题或建议，欢迎联系：**495019787@qq.com**
+
 ## 📄 许可证
 
 MIT License
 
 ## 📝 更新日志
+
+### v1.0.1 (2026-03-29)
+- 📧 添加联系方式
+- 🔧 优化输出展示
 
 ### v1.0.0 (2026-03-28)
 - 🎉 初始版本发布
